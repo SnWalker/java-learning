@@ -119,7 +119,7 @@ src.zip
 
 <img src="assets/image-20251203160340453.png" alt="image-20251203160340453" style="zoom:40%;" />
 
-# 三元运算符
+## 三元运算符
 
 三元表达式或者问号冒号表达式，存在短路。
 
@@ -132,3 +132,54 @@ src.zip
 * 计算关系表达式的值。
 * 如果关系表达式的值为真，那么执行表达式1。
 * 如果关系表达式的值为假，那么执行表达式2。
+
+# 流程控制语句
+
+（1）**switch**
+
+```java
+switch (表达式) {
+	case 1:
+		语句体1;
+		break;
+	case 2:
+		语句体2;
+		break;
+	...
+	default:
+		语句体n+1;
+		break;
+}
+```
+
+- 首先计算出表达式的值 。
+- 其次，和case依次比较，一旦有对应的值，就会执行相应的语句，在执行的过程中，遇到break就会结束。 
+- 最后，如果所有的case都和表达式的值不匹配，就会执行default语句体部分，然后程序结束掉。 
+
+- default可以放在任意位置，也可以省略。
+
+- case穿透
+
+  不写break会引发case穿透现象。
+
+- switch在JDK12的新特性
+
+```java
+int number = 10;
+switch (number) {
+    case 1 -> System.out.println("一");
+    case 2 -> System.out.println("二");
+    case 3 -> System.out.println("三");
+    default -> System.out.println("其他");
+}
+```
+
+- switch和if第三种格式各自的使用场景
+
+当我们需要对一个范围进行判断的时候，用多分枝if语句。
+
+当我们把有限个数据列举出来，选择其中一个执行的时候，用switch语句。
+
+（2）for与while如何选择？
+
+明确循环次数用for，循环次数不确定但明确循环终止条件用while。
