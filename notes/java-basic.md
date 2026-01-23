@@ -303,3 +303,6 @@ JDK 21 中，ArrayList 默认构造通过**空数组**实现懒加载，首添�
 
 *   **最大容量**：理论最大容量为 `Integer.MAX_VALUE`。但在通常情况下，软限制为 `Integer.MAX_VALUE - 8` (即 `MAX_ARRAY_SIZE`)，这是为了预留头部信息防止 OOM。
 *   **缩容**：ArrayList **不会自动缩容**。若需要释放多余空间，需手动调用 `trimToSize()`。
+
+
+
