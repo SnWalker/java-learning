@@ -20,7 +20,7 @@
 - **动态代理**：Java 动态代理（Proxy）是基于反射实现的。
 - **开发工具**：IDEA 的自动提示功能（输入对象点一下，跳出方法列表）就是利用反射分析类结构实现的。
 
-#### 4. 优缺点
+## 4. 优缺点
 
 - **优点**：
   - **灵活性极高**：可以在程序运行期间动态加载类，提高代码的通用性。
@@ -100,12 +100,6 @@
 
 
 
-# 注解
-
-
-
-
-
 # 类加载器
 
 负责将.class文件（存储的物理文件）加载在到内存中。
@@ -171,7 +165,7 @@
 
 ![06_类加载过程初始化](assets/06_类加载过程初始化.png)
 
-## 2. 类加载的分类【理解】
+## 2. 类加载的分类
 
 + 分类
 
@@ -206,7 +200,7 @@
   }
   ```
 
-## 3. 双亲委派模型【理解】
+## 3. 双亲委派模型
 
 + 介绍
 
@@ -214,7 +208,7 @@
 
 <img src="assets/07_双亲委派模型.png" alt="07_双亲委派模型" style="zoom:50%;" />
 
-## 4. ClassLoader 中的两个方法【应用】
+## 4. ClassLoader 中的两个方法
 
 - 方法介绍
 
@@ -360,4 +354,88 @@ file.createNewFile();
 ```
 
 
+
+# 注解 (Annotation) 
+
+### 1. 核心概念
+
+- **定义**：注解是给 **JVM 或 框架** 看的元数据（Metadata），用于配置程序行为，而非改变程序逻辑。
+- **本质**：所有的注解本质上都是继承自 `java.lang.annotation.Annotation` 接口的特殊接口（`@interface`）。
+
+### 2. 自定义注解的要素 (参考 `MyTest`)
+
+要定义一个能被框架解析的注解，必须关注以下三点：
+
+#### 2.1 元注解 (Meta-Annotations)
+
+用来配置“注解的注解”。
+
+- **`@Target` (位置)**：决定注解能贴在哪里。
+  - `ElementType.METHOD`：仅限方法（你的 Demo）。
+  - `ElementType.TYPE`：类、接口（Spring 的 `@Service`）。
+  - `ElementType.FIELD`：成员变量（Spring 的 `@Autowired`）。
+- **`@Retention` (寿命)**：决定注解活多久。**（后端开发最关键点）**
+  - `RetentionPolicy.RUNTIME`：**必须选它！** 只有这样，注解才会保留到运行期，可以通过反射读取。
+  - `SOURCE` / `CLASS`：会被编译器或 JVM 丢弃，反射无法读取。
+
+#### 2.2 属性定义
+
+- **基本定义**：`Type name() default value;`
+- **`value` 特权**：如果属性名为 `value` 且是唯一赋值项，赋值时可省略属性名（如 `@MyTest("描述")`）。
+
+```java
+// 示例：定义
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME) // 关键：反射必须用 RUNTIME
+public @interface MyTest {
+    String value() default "无描述信息"; // 默认值
+    int priority() default 1;
+}
+```
+
+### 3. 注解的解析 (核心：反射机制)
+
+注解本身是“静止”的，只有配合**反射**才能产生作用。这也是 Spring 等框架“自动化”的原理。
+
+**解析四部曲 (参考 `MyTestDemo`)：**
+
+1. **获取类对象**：加载目标类的字节码。
+
+   ```java
+   Class clazz = Class.forName("annotation.MyTestMethod");
+   ```
+
+2. **获取成员**：获取所有方法（包括私有）。
+
+   ```java
+   Method[] methods = clazz.getDeclaredMethods(); 
+   ```
+
+3. **检查注解**：判断该方法头上是否有特定标签。
+
+   ```java
+   if (method.isAnnotationPresent(MyTest.class)) { ... }
+   ```
+
+4. **读取与执行**：读取注解里的配置信息，并执行相应逻辑。
+
+   ```java
+   // 暴力反射：允许执行 private 方法
+   method.setAccessible(true); 
+   // 执行方法
+   method.invoke(o);
+   // 读取属性
+   MyTest anno = method.getAnnotation(MyTest.class);
+   System.out.println(anno.value()); // 获取配置的信息
+   ```
+
+### 4. 总结
+
+- **为什么一定要用 `RUNTIME`？**
+  - 因为后端框架（Spring, MyBatis）都是在**程序启动运行后**，动态扫描类文件并解析注解的。如果是 `SOURCE`，框架运行时根本看不到这些注解。
+- **注解的作用**：
+  - **标记**：告诉框架哪个是 Controller，哪个是 Service。
+  - **配置**：告诉框架 URL 是什么 (`@RequestMapping`)，数据库表名是什么 (`@TableName`)。
+- **getDeclaredMethods vs getMethods**：
+  - `getDeclaredMethods()` 能获取**私有方法**（如 Demo 中的 `test3`），配合 `setAccessible(true)` 可以实现对任意方法的自动化控制（例如：单元测试框架通常都要测私有方法）。
 
